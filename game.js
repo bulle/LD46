@@ -24,21 +24,37 @@ var parameters = {
     plant: 50
 }
 
+// window.onload = function() {
+//     var gameConfig = {
+//         type: Phaser.AUTO,
+//         backgroundColor:0xff0000,
+//         scale: {
+//             mode: Phaser.Scale.FIT,
+//             autoCenter: Phaser.Scale.CENTER_BOTH,
+//             width: 800,
+//             height: 600
+//         },
+//         scene: playGame,
+//     }
+//     game = new Phaser.Game(gameConfig);
+//     window.focus();
+// }
+
 window.onload = function() {
-    var gameConfig = {
-        type: Phaser.AUTO,
-        backgroundColor:0xff0000,
-        scale: {
-            mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-            width: 800,
-            height: 600
-        },
-        scene: playGame,
+        var gameConfig = {
+            type: Phaser.AUTO,
+            backgroundColor:0xff0000,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 800,
+                height: 600
+            },
+            scene: playGame,
+        }
+        game = new Phaser.Game(gameConfig);
+        window.focus();
     }
-    game = new Phaser.Game(gameConfig);
-    window.focus();
-}
 
 // Stuffed variables
 var i;
