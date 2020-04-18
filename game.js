@@ -11,9 +11,9 @@ var sideBar = {
     sizeX: 144,
     sizeY: 35,
     spacing: 40,
-    yOffset: 100,
+    yOffset: 110,
     xOffset: 122,
-    zones: 5
+    zones: ["study", "work", "exercise", "date", "friends", "plants", "stocks"]
 }
 
 var parameters = {
@@ -24,22 +24,6 @@ var parameters = {
     plant: 50
 }
 
-// window.onload = function() {
-//     var gameConfig = {
-//         type: Phaser.AUTO,
-//         backgroundColor:0xff0000,
-//         scale: {
-//             mode: Phaser.Scale.FIT,
-//             autoCenter: Phaser.Scale.CENTER_BOTH,
-//             width: 800,
-//             height: 600
-//         },
-//         scene: playGame,
-//     }
-//     game = new Phaser.Game(gameConfig);
-//     window.focus();
-// }
-
 window.onload = function() {
         var gameConfig = {
             type: Phaser.AUTO,
@@ -47,8 +31,9 @@ window.onload = function() {
             scale: {
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
+                // 16:9 for cell
                 width: 800,
-                height: 600
+                height: 450
             },
             scene: playGame,
         }
@@ -82,8 +67,17 @@ class playGame extends Phaser.Scene{
         this.load.image("awesome", "assets/awesome.png");
         this.load.image("topbar", "assets/topbar.png");
 
+
         // Sidebar graphics
         this.load.image("sidebar", "assets/sideBar.png");
+        this.load.image("study", "assets/book.png");
+        this.load.image("work", "assets/work.png");
+        this.load.image("exercise", "assets/exercise.png");
+        this.load.image("date", "assets/date.png");
+        this.load.image("friends", "assets/friends.png");
+        this.load.image("plants", "assets/plants.png");
+        this.load.image("stocks", "assets/stocks.png");
+        
 
         // Marker icons
         this.load.image("morning", "assets/morning.png");
@@ -132,11 +126,13 @@ class playGame extends Phaser.Scene{
 
         // Drop zones
         var zones = [];
-        for (i = 0; i < sideBar.zones; i++) {
+        var zoneImages = [];
+        for (i = 0; i < sideBar.zones.length; i++) {
             zones[i] = this.add.zone(sideBar.xOffset, sideBar.yOffset+sideBar.sizeY/2 + sideBar.spacing*i, sideBar.sizeX, sideBar.sizeY).setRectangleDropZone(sideBar.sizeX, sideBar.sizeY);
             var graphics = this.add.graphics();
             graphics.lineStyle(2, 0xffffff);
             graphics.strokeRect(zones[i].x - zones[i].input.hitArea.width / 2, zones[i].y - zones[i].input.hitArea.height / 2, zones[i].input.hitArea.width, zones[i].input.hitArea.height);
+            zoneImages[i] = this.add.image(25, sideBar.yOffset+sideBar.sizeY/2 + i*sideBar.spacing,sideBar.zones[i]);
         }
 
         // Works with zones when dragging
@@ -144,7 +140,7 @@ class playGame extends Phaser.Scene{
         for (i=0; i < times.length; i++)
         {
             var name = times[i];
-            times[i] = this.add.image(100, 100, name).setInteractive();
+            times[i] = this.add.image(65+i*28,405, name).setInteractive();
             this.input.setDraggable(times[i]);
             times[i].key = name;
         }
