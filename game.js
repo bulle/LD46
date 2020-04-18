@@ -83,7 +83,7 @@ class playGame extends Phaser.Scene{
         this.load.image("topbar", "assets/topbar.png");
 
         // Sidebar graphics
-        this.load.image("sidebar", "assets/sidebar.png");
+        this.load.image("sidebar", "assets/sideBar.png");
 
         // Marker icons
         this.load.image("morning", "assets/morning.png");
