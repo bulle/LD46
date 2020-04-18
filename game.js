@@ -77,7 +77,12 @@ class playGame extends Phaser.Scene{
         this.load.image("friends", "assets/friends.png");
         this.load.image("plants", "assets/plants.png");
         this.load.image("stocks", "assets/stocks.png");
-        
+
+        // Time control graphics
+        this.load.image("pause","assets/pause.png");
+        this.load.image("play","assets/play.png");
+        this.load.image("playHit","assets/play.png");
+        this.load.image("fast","assets/fast.png");
 
         // Marker icons
         this.load.image("morning", "assets/morning.png");
@@ -140,12 +145,61 @@ class playGame extends Phaser.Scene{
         for (i=0; i < times.length; i++)
         {
             var name = times[i];
-            times[i] = this.add.image(65+i*28,405, name).setInteractive();
+            times[i] = this.add.image(65+i*28,zones[5].y - zones[5].input.hitArea.height / 2 + 18, name).setInteractive();
             this.input.setDraggable(times[i]);
             times[i].key = name;
         }
+        var sideBarTopText = this.add.text(70, 90, 'Time priorities', { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
+
+        // Time control buttons
+        var pause = this.add.sprite(60, 420, 'pause');
+        var play = this.add.sprite(100, 420, 'play');
+        var fast = this.add.sprite(140, 420, 'fast');
+        pause.setInteractive();
+        play.setInteractive();
+        fast.setInteractive();
+
+        pause.on('pointerdown', function (pointer) {
+            pause.clearTint();
+            play.clearTint();
+            fast.clearTint();
+            this.setTint(0xff00f0);
+            console.log("test");
+    
+        });
+
+        play.on('pointerdown', function (pointer) {
+            pause.clearTint();
+            play.clearTint();
+            fast.clearTint();
+            this.setTint(0xff00f0);
+            console.log("test");
+    
+        });
+
+        fast.on('pointerdown', function (pointer) {
+            pause.clearTint();
+            play.clearTint();
+            fast.clearTint();
+            this.setTint(0xff00f0);
+            console.log("test");
+    
+        });
 
 
+
+/*         this.input.on('gameobjectover', function (pointer, gameObject) {
+
+            gameObject.setTint(0x7878ff);
+    
+        });
+    
+        this.input.on('gameobjectout', function (pointer, gameObject) {
+    
+            gameObject.clearTint();
+    
+        });
+ */
         this.input.on('dragstart', function (pointer, gameObject) {
 
             this.children.bringToTop(gameObject);
