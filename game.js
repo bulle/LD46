@@ -59,11 +59,11 @@ var sideBar = {
     zonesActivity: ["activityStudy", "activityWork", "activityExercise", "activityDate", "activityFriends", "activityPlants", "activityStocks"]
 }
 
-var progress = 50;
-var health = 80;
-var wealth = 40;
-var plants = 50;
-var awesome = 100;
+var progressValue = 50;
+var healthValue = 80;
+var wealthValue = 40;
+var plantsValue = 50;
+var awesomeValue = 100;
 
 
 window.onload = function() {
@@ -184,6 +184,7 @@ class playGame extends Phaser.Scene{
             masks[i].visible = false;
             bars[i][0].mask = new Phaser.Display.Masks.BitmapMask(this, masks[i]); 
         }
+        
         //#endregion
 
         //#region Zones
@@ -247,6 +248,7 @@ class playGame extends Phaser.Scene{
             this.setTint(0xff00f0);
             gameState = "fast";
             gameCounter = Date.now();
+            console.log(scoreMatrix);
         });
         //#endregion
 
@@ -312,13 +314,6 @@ class playGame extends Phaser.Scene{
         });
         //#endregion
 
-            // updateBar(progress, masks[0], bars[0][0]);
-            // updateBar(health, masks[1], bars[1][0]);
-            // updateBar(wealth, masks[2], bars[2][0]);
-            // updateBar(plants, masks[3], bars[3][0]);
-            // updateBar(awesome, masks[4], bars[4][0]);
-
-
         // Create input for game counter
         this.add.text(670, 415, "Day: ", { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
         turn = this.add.text(735, 415, gameTurn, { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
@@ -337,7 +332,6 @@ class playGame extends Phaser.Scene{
         activityPositions[2] = gameDayPositions.thirdX + 50;
         activityPositions[3] = gameDayPositions.fourthX + 50;
         activityPositions[4] = gameDayPositions.fifthX + 50;
-        console.log(activityPositions)
 
 
         
@@ -402,6 +396,25 @@ class playGame extends Phaser.Scene{
 };
 
 
+// Matrix with the dependencies for choosing [progress, health, wealth, plants, awesome][study, work, exercise, date, friends, plants, stocks]
+                //  progress  health  wealth  plants  awesome
+var scoreMatrix = [ [1,       -0.2,    0.05,   -0.3,   -0.4], // study
+                    [0.3,     -0.3,     1,     -0.3,   -0.4], // work
+                    [-0.2,     1.2,   -0.2,    -0.3,    0.4], // exercise
+                    [-0.2,      0,     -1,     -0.3,    0.8], // date
+                    [-0.2,    -0.1,   -0.2,   -0.3,     0.5], // friends
+                    [-0.2,     0.1,   -0.2,    1.5,    -0.4], // plants
+                    [0.3,     -0.3,    0.6,  -0.2,       0]]; // stocks
+
+var scaleSpeed = 3;
+
+function gameAlgorithm(inputActivity){
+    progressValue = progressValue + scaleSpeed* scoreMatrix[inputActivity][0];
+    healthValue = healthValue + scaleSpeed* scoreMatrix[inputActivity][1];
+    wealthValue = wealthValue + scaleSpeed* scoreMatrix[inputActivity][2];
+    plantsValue = plantsValue + scaleSpeed* scoreMatrix[inputActivity][3];
+    awesomeValue = awesomeValue + scaleSpeed* scoreMatrix[inputActivity][4];
+}
 
 function handleRandomEvents(){
     if ((gameTurn - lastEvent) > eventThreshold){
@@ -413,16 +426,73 @@ function handleRandomEvents(){
     }
 }
 
-function handleEventConsequences(){
+function handleEventConsequences(accepted){
+    // for(i=0; i<5; i++)
+    // {
+    //     console.log(eventConsequenceAccept[i]);
+    // }
+    if(accepted == 1){
+        progressValue = progressValue+eventConsequenceAccept[0];
+        console.log(progressValue);
+        healthValue = healthValue+eventConsequenceAccept[1];
+        wealthValue = wealthValue+eventConsequenceAccept[2];
+        plantsValue = plantsValue+eventConsequenceAccept[3];
+        awesomeValue = awesomeValue+eventConsequenceAccept[4];
+    }
+    else{
+        progressValue = progressValue+eventConsequenceReject[0];
+        healthValue = healthValue+eventConsequenceReject[1];
+        wealthValue = wealthValue+eventConsequenceReject[2];
+        plantsValue = plantsValue+eventConsequenceReject[3];
+        awesomeValue = awesomeValue+eventConsequenceReject[4];
+    }
     gameMode = "run";
     eventContainer.visible = false;
     console.log("handled");
 }
 
+var eventConsequenceAccept = [];
+var eventConsequenceReject = [];
+//  progress  health  wealth  plants  awesome
 function throwEvent(){
     eventContainer.visible = true;
     gameMode ="event"
     console.log("Event thrown");
+    selection = Math.floor(Math.random() * 3);
+    switch(selection) {
+        case 0:
+            // Grandma visiting
+            eventConsequenceAccept = [0, 10, 2, 3, -20];
+            eventConsequenceReject = [10, -20, 1, 0, 10];
+            var content = [
+                "Grandma is visiting",
+                "Let her in?"];
+            eventText.text = content;
+        break;
+
+        case 1:
+            // An opportunity
+            eventConsequenceAccept = [-20, -20, 40, -20, -30];
+            eventConsequenceReject = [0, 0, -10, 0, 10];
+            var content = [
+                "Your best friend wants you to",
+                "sell drugs. Ok?"];
+            eventText.text = content;
+        break;
+
+        case 2:
+            // A date
+            eventConsequenceAccept = [-4, 5, -10, 0, 10];
+            eventConsequenceReject = [0, -5, 0, 0, -10];
+            var content = [
+                "A girl swipped right on tinder.",
+                "Make her the star of the night?"];
+            eventText.text = content;
+        break;
+
+        default:
+            break;
+    }
 }
 
 function getActivity(){
@@ -477,7 +547,6 @@ function doAction(){
     // console.log(lastGameTurn);
     // console.log(gameTurn);
     if (lastGameTurn != gameTurn){
-        simulateBars();
         console.log("Enter loop");
         lastGameTurn = gameTurn;
         var dayAction = gameTurn%5;
@@ -488,6 +557,7 @@ function doAction(){
                 clearVisibilityActivities();
                 setImage(0);
                 activities[0].visible = true;
+                gameAlgorithm(getActivityNumber(zonesAttached[0]));
             break;
 
             case 1:
@@ -495,6 +565,7 @@ function doAction(){
                 clearVisibilityActivities();
                 setImage(1);
                 activities[1].visible = true;
+                gameAlgorithm(getActivityNumber(zonesAttached[1]));
             break;
 
             case 2:
@@ -502,6 +573,7 @@ function doAction(){
                 clearVisibilityActivities();
                 setImage(2);
                 activities[2].visible = true;
+                gameAlgorithm(getActivityNumber(zonesAttached[2]));
             break;
 
             case 3:
@@ -509,6 +581,7 @@ function doAction(){
                 clearVisibilityActivities();
                 setImage(3);
                 activities[3].visible = true;
+                gameAlgorithm(getActivityNumber(zonesAttached[3]));
             break;
 
             case 4:
@@ -516,6 +589,7 @@ function doAction(){
                 clearVisibilityActivities();
                 setImage(4);
                 activities[4].visible = true;
+                gameAlgorithm(getActivityNumber(zonesAttached[4]));
             break;
         }
     }
@@ -552,20 +626,22 @@ function checkAction(){
 };
 
 
+
+
 function updateAllBars()
 {
-    updateBar(progress, masks[0], bars[0][0]);
-    updateBar(health, masks[1], bars[1][0]);
-    updateBar(wealth, masks[2], bars[2][0]);
-    updateBar(plants, masks[3], bars[3][0]);
-    updateBar(awesome, masks[4], bars[4][0]); 
+    updateBar(progressValue, masks[0], bars[0][0]);
+    updateBar(healthValue, masks[1], bars[1][0]);
+    updateBar(wealthValue, masks[2], bars[2][0]);
+    updateBar(plantsValue, masks[3], bars[3][0]);
+    updateBar(awesomeValue, masks[4], bars[4][0]); 
 }
 
 function simulateBars()
 {
-    progress = progress+Math.random();
-    plants = plants-Math.random()*2;
-    awesome = awesome-Math.random()*4;
+    progressValue = progressValue+Math.random();
+    plantsValue = plantsValue-Math.random()*2;
+    awesomeValue = awesomeValue-Math.random()*4;
 }
 
 // Updating the mask on top of the bar
