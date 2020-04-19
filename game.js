@@ -9,17 +9,45 @@ window.onload = function() {
                 width: 800,
                 height: 450
             },
-            scene: playGame,
+            scene: [playGame, endGame]
         }
         game = new Phaser.Game(gameConfig);
         window.focus();
     }
 
+
+var endGame = new Phaser.Class({
+
+        Extends: Phaser.Scene,
+    
+        initialize:
+    
+        function endGame ()
+        {
+            Phaser.Scene.call(this, { key: 'endGame' });
+        },
+    
+        preload: function ()
+        {
+        },
+    
+        create: function ()
+        {
+
+            this.add.text(200, 80, "You survived: ", { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
+            this.add.text(200, 160, getDay(), { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
+            this.add.text(200, 240, " days", { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
+            this.add.text(200, 320, " F5 to try to perform better in life", { fontFamily: 'Arial', fontSize: 20, color: '#000000' });
+        }
+    
+    });
+
+
 class playGame extends Phaser.Scene{
-/*     constructor(){
+    constructor(){
         super("PlayGame");
     }
- */
+
     preload ()
     {
         // Stuff for bars
@@ -75,6 +103,9 @@ class playGame extends Phaser.Scene{
         this.load.image("eventBar", "assets/eventbar.png");
         this.load.image("accept", "assets/accept.png");
         this.load.image("reject", "assets/reject.png");
+
+        // Introduction
+        this.load.image("introduction", "assets/introduction.png");
     }
 
     create ()
@@ -244,11 +275,16 @@ class playGame extends Phaser.Scene{
         turn = this.add.text(735, 415, gameTurn, { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
 
         this.graphics.lineStyle(1, 0x000000);
-        gameDay[0] = this.graphics.strokeRoundedRect(gameDayPositions.firstX, 120, 100, 200, 10);
-        gameDay[1] = this.graphics.strokeRoundedRect(gameDayPositions.secondX, 120, 100, 200, 10);
-        gameDay[2] = this.graphics.strokeRoundedRect(gameDayPositions.thirdX, 120, 100, 200, 10);
-        gameDay[3] = this.graphics.strokeRoundedRect(gameDayPositions.fourthX, 120, 100, 200, 10);
-        gameDay[4] = this.graphics.strokeRoundedRect(gameDayPositions.fifthX, 120, 100, 200, 10);
+        gameDay[0] = this.graphics.strokeRoundedRect(gameDayPositions.firstX, 120, 100, 100, 10);
+        gameDay[1] = this.graphics.strokeRoundedRect(gameDayPositions.secondX, 120, 100, 100, 10);
+        gameDay[2] = this.graphics.strokeRoundedRect(gameDayPositions.thirdX, 120, 100, 100, 10);
+        gameDay[3] = this.graphics.strokeRoundedRect(gameDayPositions.fourthX, 120, 100, 100, 10);
+        gameDay[4] = this.graphics.strokeRoundedRect(gameDayPositions.fifthX, 120, 100, 100, 10);
+        this.add.text(gameDayPositions.firstX+28, 200, "Morning", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        this.add.text(gameDayPositions.secondX+30, 200, "Midday", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        this.add.text(gameDayPositions.thirdX+26, 200, "Afternoon", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        this.add.text(gameDayPositions.fourthX+28, 200, "Evening", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        this.add.text(gameDayPositions.fifthX+34, 200, "Night", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
 
         // Have game marker
         gameDayMarker = this.add.image(gameDayPositions.firstX + 50, 105, 'dayMarker');
@@ -262,11 +298,12 @@ class playGame extends Phaser.Scene{
         activityPositions[3] = gameDayPositions.fourthX + 50;
         activityPositions[4] = gameDayPositions.fifthX + 50;
 
-        activities[0] = this.add.sprite(activityPositions[0], 145, 'activityPlants');
-        activities[1] = this.add.sprite(activityPositions[1], 145, 'activityPlants');
-        activities[2] = this.add.sprite(activityPositions[2], 145, 'activityPlants');
-        activities[3] = this.add.sprite(activityPositions[3], 145, 'activityPlants');
-        activities[4] = this.add.sprite(activityPositions[4], 145, 'activityPlants');
+        activities[0] = this.add.sprite(activityPositions[0], activityPosY, 'activityPlants');
+        activities[1] = this.add.sprite(activityPositions[1], activityPosY, 'activityPlants');
+        activities[2] = this.add.sprite(activityPositions[2], activityPosY, 'activityPlants');
+        activities[3] = this.add.sprite(activityPositions[3], activityPosY, 'activityPlants');
+        activities[4] = this.add.sprite(activityPositions[4], activityPosY, 'activityPlants');
+
        
         for(i=0; i<5; i++){
             activities[i].visible = false;
@@ -287,9 +324,9 @@ class playGame extends Phaser.Scene{
 
         //#region Event content
         // Set up event parts needed
-        eventArea = this.add.sprite(400, 380, 'eventBar');
-        eventAccept = this.add.sprite(480, 405, 'accept');
-        eventReject = this.add.sprite(520, 405, 'reject');
+        eventArea = this.add.sprite(650, 280, 'eventBar');
+        eventAccept = this.add.sprite(710, 305, 'accept');
+        eventReject = this.add.sprite(760, 305, 'reject');
         eventAccept.setInteractive();
         eventReject.setInteractive();
 
@@ -302,7 +339,7 @@ class playGame extends Phaser.Scene{
         });
 
         // Create event container
-        eventText = this.add.text(340, 345, "", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        eventText = this.add.text(590, 245, "", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
         textForFocus = this.add.text(580, 345, "Handle event!", { fontFamily: 'Arial', fontSize: 32, color: '#ff0f0f' });
         eventContainer = this.add.container(0, 0);
         eventContainer.add([eventArea, eventAccept, eventReject, eventText, textForFocus]);
@@ -313,6 +350,22 @@ class playGame extends Phaser.Scene{
         // Set game mode to run the game (not event mode)
 
         gameMode = "run";
+
+        // gameIntroduction
+        var introduction = this.add.sprite(400, 225, 'introduction');
+        introduction.setInteractive();
+        introduction.on('pointerdown', function (pointer) {
+            introduction.visible = false;
+            console.log("clicked");
+        });
+
+        // var content = [
+        //     "This is a life simulation game! - Basically, all you have to do is to make choices to help out with all the success criteria in"
+        // ]
+        // gameIntro = this.add.text(300, 245, content, { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+
+        
+
     }
 
     update ()
@@ -322,6 +375,11 @@ class playGame extends Phaser.Scene{
             updateDay();
             doAction();
             updateAllBars();
+            bounds();
+            if(progressValue <= 0 || healthValue <= 0 || wealthValue <= 0 || plantsValue <= 0 || awesomeValue <= 0){
+                console.log("end game");
+                this.scene.start('endGame');
+            }
         }
     }
 };

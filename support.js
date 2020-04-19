@@ -23,7 +23,7 @@ var gameDayMarker;
 
 var gameTime = {
     play: 800,
-    fast: 300
+    fast: 20
 }
 
 var game;
@@ -39,6 +39,7 @@ var turn;
 var activities = [];
 var activityAnimations = [];
 var activityPositions = [];
+var activityPosY = 155;
 
 // Stuffed variables
 var i;
@@ -88,7 +89,7 @@ function setImage(activityNumber){
     var orgy = activities[activityNumber].y;
     activities[activityNumber] = activityAnimations[getActivityNumber(zonesAttached[activityNumber])];
     activities[activityNumber].x = activityPositions[activityNumber];
-    activities[activityNumber].y = 145;
+    activities[activityNumber].y = activityPosY;
     activities[activityNumber].visible = true;
 }
 
@@ -142,7 +143,11 @@ function doAction(){
 }
 
 function updateDay(){
-    turn.text = Math.floor(gameTurn/5);
+    turn.text = getDay();
+}
+
+function getDay(){
+    return Math.floor(gameTurn/5);
 }
 
 function moveDayMarker(newPos){

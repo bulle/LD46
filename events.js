@@ -10,189 +10,147 @@ var lastEvent = 0;
 var eventThreshold = 10;
 var eventLikelyhood = 5;
 
+var eventsActive = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+// make response passer!
+
 //  progress  health  wealth  plants  awesome
 // Write the function out in a dedicated 
 function throwEvent(){
     eventContainer.visible = true;
     gameMode ="event"
-    selection = Math.floor(Math.random() * 3);
+    selection = Math.floor(Math.random() * 10);
     switch(selection) {
         case 0:
             // Grandma visiting
-            eventConsequenceAccept = [0, 10, 2, 3, -20];
-            eventConsequenceReject = [10, -20, 1, 0, 10];
-            var content = [
-                "Grandma is visiting",
-                "Let her in?"];
-            eventText.text = content;
+            if(eventsActive[0] == 1){
+                eventConsequenceAccept = [0, 10, 2, 3, -20];
+                eventConsequenceReject = [10, -20, 1, 0, 10];
+                var content = [
+                    "Grandma is visiting",
+                    "Let her in?"];
+                eventText.text = content;
+            }
+            eventsActive[0] = 1;
         break;
 
         case 1:
             // An opportunity
-            eventConsequenceAccept = [-20, -20, 40, -20, -30];
-            eventConsequenceReject = [0, 0, -10, 0, 10];
-            var content = [
-                "Your best friend wants you to",
-                "sell drugs. Ok?"];
-            eventText.text = content;
+            if(eventsActive[1] == 1){
+                eventConsequenceAccept = [-20, -20, 40, -20, -30];
+                eventConsequenceReject = [0, 0, -10, 0, 10];
+                var content = [
+                    "Your best friend wants you to",
+                    "sell drugs. Ok?"];
+                eventText.text = content;
+            }
+            eventsActive[1] = 0;
         break;
 
         case 2:
             // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            if(eventsActive[2] == 1){
+            //  progress  health  wealth  plants  awesome
+                eventConsequenceAccept = [-4, 5, -10, 0, 10];
+                eventConsequenceReject = [0, -5, 0, 0, -10];
+                var content = [
+                    "A girl swipped right on tinder.",
+                    "Make her the star of the night?"];
+                eventText.text = content;
+            }
+            eventsActive[2] = 1;
         break;
 
         case 3:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // An exam
+            if(eventsActive[3] == 1){
+                //  progress  health  wealth  plants  awesome 
+                eventConsequenceAccept = [-10, -10, -10, -2, 20];
+                eventConsequenceReject = [10, 0, 0, 2, -10];
+                var content = [
+                    "You have an exam tomorrow BUT",
+                    "your body wants to go to town - go?"];
+                eventText.text = content;
+            }
+            eventsActive[3] = 1;
         break;
         case 4:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // Skiholiday
+            if(eventsActive[4] == 1){
+                //  progress  health  wealth  plants  awesome
+                eventConsequenceAccept = [-5, -5, -20, -10, 30];
+                eventConsequenceReject = [5, 0, 0, 2, -10];
+                var content = [
+                    "Your freinds want to go skiing.",
+                    "Join them for an epic ride?"];
+                eventText.text = content;
+            }
+            eventsActive[4] = 0;
         break;
         case 5:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // A trip to the forrest
+            if(eventsActive[5] == 1){
+                //  progress  health  wealth  plants  awesome
+                eventConsequenceAccept = [-2, 2, 0, 10, 0];
+                eventConsequenceReject = [2, -2, 0, 0, -5];
+                var content = [
+                    "A lot of nice flowers are blooming.",
+                    "Nice day for picking a bucket - yes?"];
+                eventText.text = content;
+            }
+            eventsActive[5] = 0;
         break;
         case 6:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // Grandma
+            if(eventsActive[6] == 1){
+                eventConsequenceAccept = [0, 10, 2, 3, -20];
+                eventConsequenceReject = [10, -20, 1, 0, 10];
+                var content = [
+                    "Grandma is visiting",
+                    "Let her in?"];
+                eventText.text = content;
+            }
+            eventsActive[6] = 0;
         break;
         case 7:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // Grandma
+            if(eventsActive[7] == 1){
+                eventConsequenceAccept = [0, 10, 2, 3, -20];
+                eventConsequenceReject = [10, -20, 1, 0, 10];
+                var content = [
+                    "Grandma is visiting",
+                    "Let her in?"];
+                eventText.text = content;
+            }
+            eventsActive[7] = 0;
         break;
         case 8:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // Pandemic
+            if(eventsActive[8] == 1){
+                //  progress  health  wealth  plants  awesome
+                eventConsequenceAccept = [0, -110, -10, -20, -20];
+                eventConsequenceReject = [10, -5, 5, 5, 0];
+                var content = [
+                    "A pandemic as at the rise - but", 
+                    "vacation!",
+                    "Go with family on vacation - yes?"];
+                eventText.text = content;
+            }
+            eventsActive[8] = 0;
         break;
         case 9:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
+            // A girlfriend
+            if(eventsActive[9] == 1){
+                //  progress  health  wealth  plants  awesome
+                eventConsequenceAccept = [10, 20, -50, 10, 0];
+                eventConsequenceReject = [2, -2, 0, -5, -10];
+                var content = [
+                    "She is okay, she is okay.",
+                    "Make her exclusive?"];
+                eventText.text = content;
+            }
+            eventsActive[9] = 0;
         break;
-        case 10:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 1:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 12:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 13:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 14:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 15:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 16:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 17:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        case 18:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-        default:
-            break;
     }
 }
 
