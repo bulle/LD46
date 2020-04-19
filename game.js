@@ -21,6 +21,8 @@ var lastEvent = 0;
 var eventThreshold = 10;
 var eventLikelyhood = 5;
 
+var bars = [["progressBar","progessContainer"], ["healthBar","healthContainer"], ["wealthBar","wealthContainer"], ["awesomeBar","awesomeContainer"],["plantBar","plantContainer"]];
+var masks = [];
 
 var gameTime = {
     play: 800,
@@ -57,13 +59,12 @@ var sideBar = {
     zonesActivity: ["activityStudy", "activityWork", "activityExercise", "activityDate", "activityFriends", "activityPlants", "activityStocks"]
 }
 
-var parameters = {
-    progress: 50,
-    health: 50,
-    wealth: 50,
-    awesome: 50,
-    plant: 50
-}
+var progress = 50;
+var health = 80;
+var wealth = 40;
+var plants = 50;
+var awesome = 100;
+
 
 window.onload = function() {
         var gameConfig = {
@@ -170,8 +171,8 @@ class playGame extends Phaser.Scene{
         var container = this.add.container(0, 0);
 
         // Generate bars for the different parameters
-        var bars = [["progressBar","progessContainer"], ["healthBar","healthContainer"], ["wealthBar","wealthContainer"], ["awesomeBar","awesomeContainer"],["plantBar","plantContainer"]];
-        var masks = [];
+        // var bars = [["progressBar","progessContainer"], ["healthBar","healthContainer"], ["wealthBar","wealthContainer"], ["awesomeBar","awesomeContainer"],["plantBar","plantContainer"]];
+        // var masks = [];
         for(i=0; i<5; i++){
             var nameBar = bars[i][0];
             var nameContainer = bars[i][1];
@@ -311,13 +312,11 @@ class playGame extends Phaser.Scene{
         });
         //#endregion
 
-        this.input.on('pointerdown', function (pointer) {
-            updateBar(50, masks[0], bars[0][0]);
-            updateBar(20, masks[1], bars[1][0]);
-            updateBar(10, masks[2], bars[2][0]);
-            updateBar(100, masks[3], bars[3][0]);
-            updateBar(70, masks[4], bars[4][0]);
-        }, this);
+            // updateBar(progress, masks[0], bars[0][0]);
+            // updateBar(health, masks[1], bars[1][0]);
+            // updateBar(wealth, masks[2], bars[2][0]);
+            // updateBar(plants, masks[3], bars[3][0]);
+            // updateBar(awesome, masks[4], bars[4][0]);
 
 
         // Create input for game counter
@@ -397,6 +396,7 @@ class playGame extends Phaser.Scene{
             checkAction();
             updateDay();
             doAction();
+            updateAllBars();
         }
     }
 };
@@ -477,6 +477,7 @@ function doAction(){
     // console.log(lastGameTurn);
     // console.log(gameTurn);
     if (lastGameTurn != gameTurn){
+        simulateBars();
         console.log("Enter loop");
         lastGameTurn = gameTurn;
         var dayAction = gameTurn%5;
@@ -550,6 +551,22 @@ function checkAction(){
       }
 };
 
+
+function updateAllBars()
+{
+    updateBar(progress, masks[0], bars[0][0]);
+    updateBar(health, masks[1], bars[1][0]);
+    updateBar(wealth, masks[2], bars[2][0]);
+    updateBar(plants, masks[3], bars[3][0]);
+    updateBar(awesome, masks[4], bars[4][0]); 
+}
+
+function simulateBars()
+{
+    progress = progress+Math.random();
+    plants = plants-Math.random()*2;
+    awesome = awesome-Math.random()*4;
+}
 
 // Updating the mask on top of the bar
 function updateBar(number, objM, objP){
