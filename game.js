@@ -1,71 +1,3 @@
-var game;
-
-var zonesAttached = [];
-var zones = [];
-var zoneImages = [];
-var times = ["morning", "midday", "afternoon", "evening", "night"];
-var gameCounter = 0;
-var gameTurn = 0;
-var lastGameTurn = -1;
-var turn;
-var activities = [];
-var activityAnimations = [];
-var activityPositions = [];
-var eventArea;
-var eventAccept;
-var eventReject;
-var eventText;
-var eventContainer;
-var textForFocus;
-var lastEvent = 0;
-var eventThreshold = 10;
-var eventLikelyhood = 5;
-
-var bars = [["progressBar","progessContainer"], ["healthBar","healthContainer"], ["wealthBar","wealthContainer"], ["awesomeBar","awesomeContainer"],["plantBar","plantContainer"]];
-var masks = [];
-
-var gameTime = {
-    play: 800,
-    fast: 100
-}
-
-var gameMode;
-var gameState;
-var gameDay = [];
-var gameDayMarker;
-
-var gameDayPositions = {
-    firstX: 210,
-    secondX: 330,
-    thirdX: 450,
-    fourthX: 570,
-    fifthX: 690
-}
-
-var topBar = {
-    startX: 84,
-    startY: 62, //47,
-    spacing: 158,
-    textY: 25 //15
-}
-
-var sideBar = {
-    sizeX: 144,
-    sizeY: 35,
-    spacing: 40,
-    yOffset: 110,
-    xOffset: 122,
-    zones: ["study", "work", "exercise", "date", "friends", "plants", "stocks"],
-    zonesActivity: ["activityStudy", "activityWork", "activityExercise", "activityDate", "activityFriends", "activityPlants", "activityStocks"]
-}
-
-var progressValue = 50;
-var healthValue = 80;
-var wealthValue = 40;
-var plantsValue = 50;
-var awesomeValue = 100;
-
-
 window.onload = function() {
         var gameConfig = {
             type: Phaser.AUTO,
@@ -83,15 +15,11 @@ window.onload = function() {
         window.focus();
     }
 
-// Stuffed variables
-var i;
-var imagebars = [];
-
 class playGame extends Phaser.Scene{
-    constructor(){
+/*     constructor(){
         super("PlayGame");
     }
-
+ */
     preload ()
     {
         // Stuff for bars
@@ -210,7 +138,6 @@ class playGame extends Phaser.Scene{
         var sideBarTopText = this.add.text(70, 90, 'Time priorities', { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
         //#endregion
 
-
         //#region Time control
 
         var pause = this.add.sprite(60, 420, 'pause');
@@ -227,8 +154,6 @@ class playGame extends Phaser.Scene{
             play.clearTint();
             fast.clearTint();
             this.setTint(0xff00f0);
-            console.log(pause.isTinted);
-            console.log(play.isTinted);
             gameState = "pause";    
         });
 
@@ -248,7 +173,6 @@ class playGame extends Phaser.Scene{
             this.setTint(0xff00f0);
             gameState = "fast";
             gameCounter = Date.now();
-            console.log(scoreMatrix);
         });
         //#endregion
 
@@ -314,6 +238,7 @@ class playGame extends Phaser.Scene{
         });
         //#endregion
 
+        //#region Simulation areas and marker
         // Create input for game counter
         this.add.text(670, 415, "Day: ", { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
         turn = this.add.text(735, 415, gameTurn, { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
@@ -325,16 +250,18 @@ class playGame extends Phaser.Scene{
         gameDay[3] = this.graphics.strokeRoundedRect(gameDayPositions.fourthX, 120, 100, 200, 10);
         gameDay[4] = this.graphics.strokeRoundedRect(gameDayPositions.fifthX, 120, 100, 200, 10);
 
+        // Have game marker
         gameDayMarker = this.add.image(gameDayPositions.firstX + 50, 105, 'dayMarker');
+        //#endregion
 
+        //#region Activity content
+        // Set up activities to have included in the activity area plus initials
         activityPositions[0] = gameDayPositions.firstX + 50;
         activityPositions[1] = gameDayPositions.secondX + 50;
         activityPositions[2] = gameDayPositions.thirdX + 50;
         activityPositions[3] = gameDayPositions.fourthX + 50;
         activityPositions[4] = gameDayPositions.fifthX + 50;
 
-
-        
         activities[0] = this.add.sprite(activityPositions[0], 145, 'activityPlants');
         activities[1] = this.add.sprite(activityPositions[1], 145, 'activityPlants');
         activities[2] = this.add.sprite(activityPositions[2], 145, 'activityPlants');
@@ -356,7 +283,10 @@ class playGame extends Phaser.Scene{
         for(i=0; i<activityAnimations.length; i++){
             activityAnimations[i].visible = false;
         }
+    //#endregion
 
+        //#region Event content
+        // Set up event parts needed
         eventArea = this.add.sprite(400, 380, 'eventBar');
         eventAccept = this.add.sprite(480, 405, 'accept');
         eventReject = this.add.sprite(520, 405, 'reject');
@@ -364,23 +294,24 @@ class playGame extends Phaser.Scene{
         eventReject.setInteractive();
 
         eventAccept.on('pointerdown', function (pointer) {
-            console.log("Accept");
             handleEventConsequences(1);
         });
 
         eventReject.on('pointerdown', function (pointer) {
-            console.log("Reject");
             handleEventConsequences(0);
         });
 
-        var content = [
-            "Just loaded"];
-
-        eventText = this.add.text(340, 345, content, { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        // Create event container
+        eventText = this.add.text(340, 345, "", { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
         textForFocus = this.add.text(580, 345, "Handle event!", { fontFamily: 'Arial', fontSize: 32, color: '#ff0f0f' });
         eventContainer = this.add.container(0, 0);
         eventContainer.add([eventArea, eventAccept, eventReject, eventText, textForFocus]);
         eventContainer.visible = false;
+
+        //#endregion
+
+        // Set game mode to run the game (not event mode)
+
         gameMode = "run";
     }
 
@@ -394,276 +325,3 @@ class playGame extends Phaser.Scene{
         }
     }
 };
-
-
-// Matrix with the dependencies for choosing [progress, health, wealth, plants, awesome][study, work, exercise, date, friends, plants, stocks]
-                //  progress  health  wealth  plants  awesome
-var scoreMatrix = [ [1,       -0.2,    0.05,   -0.3,   -0.4], // study
-                    [0.3,     -0.3,     1,     -0.3,   -0.4], // work
-                    [-0.2,     1.2,   -0.2,    -0.3,    0.4], // exercise
-                    [-0.2,      0,     -1,     -0.3,    0.8], // date
-                    [-0.2,    -0.1,   -0.2,   -0.3,     0.5], // friends
-                    [-0.2,     0.1,   -0.2,    1.5,    -0.4], // plants
-                    [0.3,     -0.3,    0.6,  -0.2,       0]]; // stocks
-
-var scaleSpeed = 3;
-
-function gameAlgorithm(inputActivity){
-    progressValue = progressValue + scaleSpeed* scoreMatrix[inputActivity][0];
-    healthValue = healthValue + scaleSpeed* scoreMatrix[inputActivity][1];
-    wealthValue = wealthValue + scaleSpeed* scoreMatrix[inputActivity][2];
-    plantsValue = plantsValue + scaleSpeed* scoreMatrix[inputActivity][3];
-    awesomeValue = awesomeValue + scaleSpeed* scoreMatrix[inputActivity][4];
-}
-
-function handleRandomEvents(){
-    if ((gameTurn - lastEvent) > eventThreshold){
-        if(Math.floor(Math.random() * eventLikelyhood) == 0){
-            lastEvent = gameTurn;
-            console.log("New event!");
-            throwEvent();
-        }
-    }
-}
-
-function handleEventConsequences(accepted){
-    // for(i=0; i<5; i++)
-    // {
-    //     console.log(eventConsequenceAccept[i]);
-    // }
-    if(accepted == 1){
-        progressValue = progressValue+eventConsequenceAccept[0];
-        console.log(progressValue);
-        healthValue = healthValue+eventConsequenceAccept[1];
-        wealthValue = wealthValue+eventConsequenceAccept[2];
-        plantsValue = plantsValue+eventConsequenceAccept[3];
-        awesomeValue = awesomeValue+eventConsequenceAccept[4];
-    }
-    else{
-        progressValue = progressValue+eventConsequenceReject[0];
-        healthValue = healthValue+eventConsequenceReject[1];
-        wealthValue = wealthValue+eventConsequenceReject[2];
-        plantsValue = plantsValue+eventConsequenceReject[3];
-        awesomeValue = awesomeValue+eventConsequenceReject[4];
-    }
-    gameMode = "run";
-    eventContainer.visible = false;
-    console.log("handled");
-}
-
-var eventConsequenceAccept = [];
-var eventConsequenceReject = [];
-//  progress  health  wealth  plants  awesome
-function throwEvent(){
-    eventContainer.visible = true;
-    gameMode ="event"
-    console.log("Event thrown");
-    selection = Math.floor(Math.random() * 3);
-    switch(selection) {
-        case 0:
-            // Grandma visiting
-            eventConsequenceAccept = [0, 10, 2, 3, -20];
-            eventConsequenceReject = [10, -20, 1, 0, 10];
-            var content = [
-                "Grandma is visiting",
-                "Let her in?"];
-            eventText.text = content;
-        break;
-
-        case 1:
-            // An opportunity
-            eventConsequenceAccept = [-20, -20, 40, -20, -30];
-            eventConsequenceReject = [0, 0, -10, 0, 10];
-            var content = [
-                "Your best friend wants you to",
-                "sell drugs. Ok?"];
-            eventText.text = content;
-        break;
-
-        case 2:
-            // A date
-            eventConsequenceAccept = [-4, 5, -10, 0, 10];
-            eventConsequenceReject = [0, -5, 0, 0, -10];
-            var content = [
-                "A girl swipped right on tinder.",
-                "Make her the star of the night?"];
-            eventText.text = content;
-        break;
-
-        default:
-            break;
-    }
-}
-
-function getActivity(){
-
-}
-
-function clearVisibilityActivities(){
-    for(i=0;i<activities.length;i++){
-        activities[i].visible = false;
-    }
-}
-
-function getActivityNumber(zonesAtt){
-        switch(zonesAtt) {
-            case "activityStudy":
-                return 0;
-                break;
-            case "activityWork":
-                return 1;
-                break;
-            case "activityExercise":
-                return 2;
-                break;
-            case "activityDate":
-                return 3;
-                break;
-            case "activityFriends":
-                return 4;
-                break;
-            case "activityPlants":
-                return 5;
-                break;
-            case "activityStocks":
-                return 6;
-                break;
-            default:
-                return 5;
-                break;
-    }
-}
-
-function setImage(activityNumber){
-    var orgx = activities[activityNumber].x;
-    var orgy = activities[activityNumber].y;
-    activities[activityNumber] = activityAnimations[getActivityNumber(zonesAttached[activityNumber])];
-    activities[activityNumber].x = activityPositions[activityNumber];
-    activities[activityNumber].y = 145;
-    activities[activityNumber].visible = true;
-}
-
-function doAction(){
-    // console.log(lastGameTurn);
-    // console.log(gameTurn);
-    if (lastGameTurn != gameTurn){
-        console.log("Enter loop");
-        lastGameTurn = gameTurn;
-        var dayAction = gameTurn%5;
-        handleRandomEvents();
-        switch(dayAction) {
-            case 0:
-                moveDayMarker(gameDayPositions.firstX+50);
-                clearVisibilityActivities();
-                setImage(0);
-                activities[0].visible = true;
-                gameAlgorithm(getActivityNumber(zonesAttached[0]));
-            break;
-
-            case 1:
-                moveDayMarker(gameDayPositions.secondX+50);
-                clearVisibilityActivities();
-                setImage(1);
-                activities[1].visible = true;
-                gameAlgorithm(getActivityNumber(zonesAttached[1]));
-            break;
-
-            case 2:
-                moveDayMarker(gameDayPositions.thirdX+50);
-                clearVisibilityActivities();
-                setImage(2);
-                activities[2].visible = true;
-                gameAlgorithm(getActivityNumber(zonesAttached[2]));
-            break;
-
-            case 3:
-                moveDayMarker(gameDayPositions.fourthX+50);
-                clearVisibilityActivities();
-                setImage(3);
-                activities[3].visible = true;
-                gameAlgorithm(getActivityNumber(zonesAttached[3]));
-            break;
-
-            case 4:
-                moveDayMarker(gameDayPositions.fifthX+50);
-                clearVisibilityActivities();
-                setImage(4);
-                activities[4].visible = true;
-                gameAlgorithm(getActivityNumber(zonesAttached[4]));
-            break;
-        }
-    }
-}
-
-function updateDay(){
-    turn.text = Math.floor(gameTurn/5);
-}
-
-function moveDayMarker(newPos){
-        gameDayMarker.x = newPos;
-
-};
-
-function checkAction(){
-    switch(gameState) {
-        case "pause":
-          break;
-
-        case "play":
-            if((Date.now()-gameCounter)>=gameTime.play){
-                gameCounter = Date.now();
-                gameTurn++;
-            }
-          break;
-
-        case "fast":
-            if((Date.now()-gameCounter)>=gameTime.fast){
-                gameCounter = Date.now();
-                gameTurn++;
-            }
-        break;
-      }
-};
-
-
-
-
-function updateAllBars()
-{
-    updateBar(progressValue, masks[0], bars[0][0]);
-    updateBar(healthValue, masks[1], bars[1][0]);
-    updateBar(wealthValue, masks[2], bars[2][0]);
-    updateBar(plantsValue, masks[3], bars[3][0]);
-    updateBar(awesomeValue, masks[4], bars[4][0]); 
-}
-
-function simulateBars()
-{
-    progressValue = progressValue+Math.random();
-    plantsValue = plantsValue-Math.random()*2;
-    awesomeValue = awesomeValue-Math.random()*4;
-}
-
-// Updating the mask on top of the bar
-function updateBar(number, objM, objP){
-    if(number >= 0 && number <= 100){
-        let updatedWidth = objP.width / 100 * number;
-        objM.x = leftSide(objP)-objP.width/2 + updatedWidth;
-    }
-}
-
-function leftSide(obj){
-    return (obj.x - obj.width/2);
-}
-
-function topSide(obj){
-    return (obj.y - obj.height/2);
-}
-
-function sleep(milliseconds) {
-    var date = Date.now();
-    var currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-  };
