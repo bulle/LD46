@@ -6,11 +6,20 @@ var zoneImages = [];
 var times = ["morning", "midday", "afternoon", "evening", "night"];
 var gameCounter = 0;
 var gameTurn = 0;
+var lastGameTurn = -1;
 var turn;
 var activities = [];
 var activityAnimations = [];
 var activityPositions = [];
-
+var eventArea;
+var eventAccept;
+var eventReject;
+var eventText;
+var eventContainer;
+var textForFocus;
+var lastEvent = 0;
+var eventThreshold = 10;
+var eventLikelyhood = 5;
 
 
 var gameTime = {
@@ -18,6 +27,7 @@ var gameTime = {
     fast: 100
 }
 
+var gameMode;
 var gameState;
 var gameDay = [];
 var gameDayMarker;
@@ -131,6 +141,11 @@ class playGame extends Phaser.Scene{
         this.load.image("activityFriends", "assets/friends.png");
         this.load.image("activityPlants", "assets/plants.png");
         this.load.image("activityStocks", "assets/stocks.png");
+
+        // Events
+        this.load.image("eventBar", "assets/eventbar.png");
+        this.load.image("accept", "assets/accept.png");
+        this.load.image("reject", "assets/reject.png");
     }
 
     create ()
@@ -349,17 +364,66 @@ class playGame extends Phaser.Scene{
             activityAnimations[i].visible = false;
         }
 
+        eventArea = this.add.sprite(400, 380, 'eventBar');
+        eventAccept = this.add.sprite(480, 405, 'accept');
+        eventReject = this.add.sprite(520, 405, 'reject');
+        eventAccept.setInteractive();
+        eventReject.setInteractive();
+
+        eventAccept.on('pointerdown', function (pointer) {
+            console.log("Accept");
+            handleEventConsequences(1);
+        });
+
+        eventReject.on('pointerdown', function (pointer) {
+            console.log("Reject");
+            handleEventConsequences(0);
+        });
+
+        var content = [
+            "Just loaded"];
+
+        eventText = this.add.text(340, 345, content, { fontFamily: 'Arial', fontSize: 12, color: '#000000' });
+        textForFocus = this.add.text(580, 345, "Handle event!", { fontFamily: 'Arial', fontSize: 32, color: '#ff0f0f' });
+        eventContainer = this.add.container(0, 0);
+        eventContainer.add([eventArea, eventAccept, eventReject, eventText, textForFocus]);
+        eventContainer.visible = false;
+        gameMode = "run";
     }
 
     update ()
     {
-        checkAction();
-        updateDay();
-        doAction();
-        
-
+        if(gameMode == "run"){
+            checkAction();
+            updateDay();
+            doAction();
+        }
     }
 };
+
+
+
+function handleRandomEvents(){
+    if ((gameTurn - lastEvent) > eventThreshold){
+        if(Math.floor(Math.random() * eventLikelyhood) == 0){
+            lastEvent = gameTurn;
+            console.log("New event!");
+            throwEvent();
+        }
+    }
+}
+
+function handleEventConsequences(){
+    gameMode = "run";
+    eventContainer.visible = false;
+    console.log("handled");
+}
+
+function throwEvent(){
+    eventContainer.visible = true;
+    gameMode ="event"
+    console.log("Event thrown");
+}
 
 function getActivity(){
 
@@ -410,44 +474,50 @@ function setImage(activityNumber){
 }
 
 function doAction(){
-    var dayAction = gameTurn%5;
-    // console.log(times[dayAction].key);
-    switch(dayAction) {
-        case 0:
-            moveDayMarker(gameDayPositions.firstX+50);
-            clearVisibilityActivities();
-            setImage(0);
-            activities[0].visible = true;
-          break;
+    // console.log(lastGameTurn);
+    // console.log(gameTurn);
+    if (lastGameTurn != gameTurn){
+        console.log("Enter loop");
+        lastGameTurn = gameTurn;
+        var dayAction = gameTurn%5;
+        handleRandomEvents();
+        switch(dayAction) {
+            case 0:
+                moveDayMarker(gameDayPositions.firstX+50);
+                clearVisibilityActivities();
+                setImage(0);
+                activities[0].visible = true;
+            break;
 
-        case 1:
-            moveDayMarker(gameDayPositions.secondX+50);
-            clearVisibilityActivities();
-            setImage(1);
-            activities[1].visible = true;
-        break;
+            case 1:
+                moveDayMarker(gameDayPositions.secondX+50);
+                clearVisibilityActivities();
+                setImage(1);
+                activities[1].visible = true;
+            break;
 
-        case 2:
-            moveDayMarker(gameDayPositions.thirdX+50);
-            clearVisibilityActivities();
-            setImage(2);
-            activities[2].visible = true;
-          break;
+            case 2:
+                moveDayMarker(gameDayPositions.thirdX+50);
+                clearVisibilityActivities();
+                setImage(2);
+                activities[2].visible = true;
+            break;
 
-        case 3:
-            moveDayMarker(gameDayPositions.fourthX+50);
-            clearVisibilityActivities();
-            setImage(3);
-            activities[3].visible = true;
-        break;
+            case 3:
+                moveDayMarker(gameDayPositions.fourthX+50);
+                clearVisibilityActivities();
+                setImage(3);
+                activities[3].visible = true;
+            break;
 
-        case 4:
-            moveDayMarker(gameDayPositions.fifthX+50);
-            clearVisibilityActivities();
-            setImage(4);
-            activities[4].visible = true;
-        break;
-      }
+            case 4:
+                moveDayMarker(gameDayPositions.fifthX+50);
+                clearVisibilityActivities();
+                setImage(4);
+                activities[4].visible = true;
+            break;
+        }
+    }
 }
 
 function updateDay(){
@@ -498,8 +568,8 @@ function topSide(obj){
 }
 
 function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
+    var date = Date.now();
+    var currentDate = null;
     do {
       currentDate = Date.now();
     } while (currentDate - date < milliseconds);
