@@ -1,5 +1,35 @@
 var game;
 
+var zonesAttached = [];
+var zones = [];
+var zoneImages = [];
+var times = ["morning", "midday", "afternoon", "evening", "night"];
+var gameCounter = 0;
+var gameTurn = 0;
+var turn;
+var activities = [];
+var activityAnimations = [];
+var activityPositions = [];
+
+
+
+var gameTime = {
+    play: 800,
+    fast: 100
+}
+
+var gameState;
+var gameDay = [];
+var gameDayMarker;
+
+var gameDayPositions = {
+    firstX: 210,
+    secondX: 330,
+    thirdX: 450,
+    fourthX: 570,
+    fifthX: 690
+}
+
 var topBar = {
     startX: 84,
     startY: 62, //47,
@@ -13,7 +43,8 @@ var sideBar = {
     spacing: 40,
     yOffset: 110,
     xOffset: 122,
-    zones: ["study", "work", "exercise", "date", "friends", "plants", "stocks"]
+    zones: ["study", "work", "exercise", "date", "friends", "plants", "stocks"],
+    zonesActivity: ["activityStudy", "activityWork", "activityExercise", "activityDate", "activityFriends", "activityPlants", "activityStocks"]
 }
 
 var parameters = {
@@ -27,7 +58,7 @@ var parameters = {
 window.onload = function() {
         var gameConfig = {
             type: Phaser.AUTO,
-            backgroundColor:0xff0000,
+            backgroundColor:0xffffff,
             scale: {
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -83,6 +114,7 @@ class playGame extends Phaser.Scene{
         this.load.image("play","assets/play.png");
         this.load.image("playHit","assets/play.png");
         this.load.image("fast","assets/fast.png");
+        this.load.image("dayMarker","assets/dayMarker.png");
 
         // Marker icons
         this.load.image("morning", "assets/morning.png");
@@ -90,6 +122,15 @@ class playGame extends Phaser.Scene{
         this.load.image("afternoon", "assets/afternoon.png");
         this.load.image("evening", "assets/evening.png");
         this.load.image("night", "assets/night.png");
+
+        // Activities
+        this.load.image("activityStudy", "assets/book.png");
+        this.load.image("activityWork", "assets/work.png");
+        this.load.image("activityExercise", "assets/exercise.png");
+        this.load.image("activityDate", "assets/date.png");
+        this.load.image("activityFriends", "assets/friends.png");
+        this.load.image("activityPlants", "assets/plants.png");
+        this.load.image("activityStocks", "assets/stocks.png");
     }
 
     create ()
@@ -129,11 +170,11 @@ class playGame extends Phaser.Scene{
         }
         //#endregion
 
+        //#region Zones
         // Drop zones
-        var zones = [];
-        var zoneImages = [];
         for (i = 0; i < sideBar.zones.length; i++) {
             zones[i] = this.add.zone(sideBar.xOffset, sideBar.yOffset+sideBar.sizeY/2 + sideBar.spacing*i, sideBar.sizeX, sideBar.sizeY).setRectangleDropZone(sideBar.sizeX, sideBar.sizeY);
+            zones[i].key = sideBar.zonesActivity[i];
             var graphics = this.add.graphics();
             graphics.lineStyle(2, 0xffffff);
             graphics.strokeRect(zones[i].x - zones[i].input.hitArea.width / 2, zones[i].y - zones[i].input.hitArea.height / 2, zones[i].input.hitArea.width, zones[i].input.hitArea.height);
@@ -141,7 +182,7 @@ class playGame extends Phaser.Scene{
         }
 
         // Works with zones when dragging
-        var times = ["morning", "midday", "afternoon", "evening", "night"];
+
         for (i=0; i < times.length; i++)
         {
             var name = times[i];
@@ -150,22 +191,28 @@ class playGame extends Phaser.Scene{
             times[i].key = name;
         }
         var sideBarTopText = this.add.text(70, 90, 'Time priorities', { fontFamily: 'Arial', fontSize: 16, color: '#00ff00' });
+        //#endregion
 
-        // Time control buttons
+
+        //#region Time control
+
         var pause = this.add.sprite(60, 420, 'pause');
         var play = this.add.sprite(100, 420, 'play');
         var fast = this.add.sprite(140, 420, 'fast');
         pause.setInteractive();
         play.setInteractive();
         fast.setInteractive();
+        pause.setTint(0xff00f0);
+        gameState = "pause";
 
         pause.on('pointerdown', function (pointer) {
             pause.clearTint();
             play.clearTint();
             fast.clearTint();
             this.setTint(0xff00f0);
-            console.log("test");
-    
+            console.log(pause.isTinted);
+            console.log(play.isTinted);
+            gameState = "pause";    
         });
 
         play.on('pointerdown', function (pointer) {
@@ -173,8 +220,8 @@ class playGame extends Phaser.Scene{
             play.clearTint();
             fast.clearTint();
             this.setTint(0xff00f0);
-            console.log("test");
-    
+            gameState = "play";
+            gameCounter = Date.now();
         });
 
         fast.on('pointerdown', function (pointer) {
@@ -182,24 +229,12 @@ class playGame extends Phaser.Scene{
             play.clearTint();
             fast.clearTint();
             this.setTint(0xff00f0);
-            console.log("test");
-    
+            gameState = "fast";
+            gameCounter = Date.now();
         });
+        //#endregion
 
-
-
-/*         this.input.on('gameobjectover', function (pointer, gameObject) {
-
-            gameObject.setTint(0x7878ff);
-    
-        });
-    
-        this.input.on('gameobjectout', function (pointer, gameObject) {
-    
-            gameObject.clearTint();
-    
-        });
- */
+        //#region Drag controls
         this.input.on('dragstart', function (pointer, gameObject) {
 
             this.children.bringToTop(gameObject);
@@ -212,41 +247,37 @@ class playGame extends Phaser.Scene{
     
         });
     
-        this.input.on('dragenter', function (pointer, gameObject, dropZone) {
-            console.log("drag center");
-        });
-    
-        this.input.on('dragleave', function (pointer, gameObject, dropZone) {
-            console.log("dragleave");    
-        });
-    
         this.input.on('drop', function (pointer, gameObject, dropZone) {
             switch(gameObject.key) {
 
                 case "morning":
                     gameObject.x = sideBar.xOffset-sideBar.sizeX/2+gameObject.width/2+3;
                     gameObject.y = dropZone.y;
+                    zonesAttached[0] = dropZone.key;
                   break;
 
                 case "midday":
                     gameObject.x = sideBar.xOffset-sideBar.sizeX/2+gameObject.width*1.5+6;
                     gameObject.y = dropZone.y;
-                    sideBar.sizeX
+                    zonesAttached[1] = dropZone.key;
                   break;
 
                 case "afternoon":
                     gameObject.x = sideBar.xOffset-sideBar.sizeX/2+gameObject.width*2.5+9;
                     gameObject.y = dropZone.y;
+                    zonesAttached[2] = dropZone.key;
                 break;
 
                 case "evening":
                     gameObject.x = sideBar.xOffset-sideBar.sizeX/2+gameObject.width*3.5+12;
                     gameObject.y = dropZone.y;
+                    zonesAttached[3] = dropZone.key;
                     break;
 
                 case "night":
                     gameObject.x = sideBar.xOffset-sideBar.sizeX/2+gameObject.width*4.5+15;
                     gameObject.y = dropZone.y;
+                    zonesAttached[4] = dropZone.key;
                     break;
         
                 default:
@@ -254,9 +285,8 @@ class playGame extends Phaser.Scene{
                     gameObject.y = gameObject.input.dragStartY;
                   break;
               }
-
-            // gameObject.input.enabled = false;
         });
+
         this.input.on('dragend', function (pointer, gameObject, dropped) {
             if (!dropped)
             {
@@ -264,30 +294,195 @@ class playGame extends Phaser.Scene{
                 gameObject.y = gameObject.input.dragStartY;
             }
         });
+        //#endregion
 
         this.input.on('pointerdown', function (pointer) {
-
-            console.log('down');
             updateBar(50, masks[0], bars[0][0]);
             updateBar(20, masks[1], bars[1][0]);
             updateBar(10, masks[2], bars[2][0]);
             updateBar(100, masks[3], bars[3][0]);
             updateBar(70, masks[4], bars[4][0]);
         }, this);
+
+
+        // Create input for game counter
+        this.add.text(670, 415, "Day: ", { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
+        turn = this.add.text(735, 415, gameTurn, { fontFamily: 'Arial', fontSize: 28, color: '#000000' });
+
+        this.graphics.lineStyle(1, 0x000000);
+        gameDay[0] = this.graphics.strokeRoundedRect(gameDayPositions.firstX, 120, 100, 200, 10);
+        gameDay[1] = this.graphics.strokeRoundedRect(gameDayPositions.secondX, 120, 100, 200, 10);
+        gameDay[2] = this.graphics.strokeRoundedRect(gameDayPositions.thirdX, 120, 100, 200, 10);
+        gameDay[3] = this.graphics.strokeRoundedRect(gameDayPositions.fourthX, 120, 100, 200, 10);
+        gameDay[4] = this.graphics.strokeRoundedRect(gameDayPositions.fifthX, 120, 100, 200, 10);
+
+        gameDayMarker = this.add.image(gameDayPositions.firstX + 50, 105, 'dayMarker');
+
+        activityPositions[0] = gameDayPositions.firstX + 50;
+        activityPositions[1] = gameDayPositions.secondX + 50;
+        activityPositions[2] = gameDayPositions.thirdX + 50;
+        activityPositions[3] = gameDayPositions.fourthX + 50;
+        activityPositions[4] = gameDayPositions.fifthX + 50;
+        console.log(activityPositions)
+
+
+        
+        activities[0] = this.add.sprite(activityPositions[0], 145, 'activityPlants');
+        activities[1] = this.add.sprite(activityPositions[1], 145, 'activityPlants');
+        activities[2] = this.add.sprite(activityPositions[2], 145, 'activityPlants');
+        activities[3] = this.add.sprite(activityPositions[3], 145, 'activityPlants');
+        activities[4] = this.add.sprite(activityPositions[4], 145, 'activityPlants');
+       
+        for(i=0; i<5; i++){
+            activities[i].visible = false;
+        }
+        
+        activityAnimations[0] = this.add.sprite(0, 0, 'activityStudy');
+        activityAnimations[1] = this.add.sprite(0, 0, 'activityWork');
+        activityAnimations[2] = this.add.sprite(0, 0, 'activityExercise');
+        activityAnimations[3] = this.add.sprite(0, 0, 'activityDate');
+        activityAnimations[4] = this.add.sprite(0, 0, 'activityFriends');
+        activityAnimations[5] = this.add.sprite(0, 0, 'activityPlants');
+        activityAnimations[6] = this.add.sprite(0, 0, 'activityStocks');
+
+        for(i=0; i<activityAnimations.length; i++){
+            activityAnimations[i].visible = false;
+        }
+
     }
 
     update ()
     {
+        checkAction();
+        updateDay();
+        doAction();
+        
 
- 
     }
 };
 
+function getActivity(){
+
+}
+
+function clearVisibilityActivities(){
+    for(i=0;i<activities.length;i++){
+        activities[i].visible = false;
+    }
+}
+
+function getActivityNumber(zonesAtt){
+        switch(zonesAtt) {
+            case "activityStudy":
+                return 0;
+                break;
+            case "activityWork":
+                return 1;
+                break;
+            case "activityExercise":
+                return 2;
+                break;
+            case "activityDate":
+                return 3;
+                break;
+            case "activityFriends":
+                return 4;
+                break;
+            case "activityPlants":
+                return 5;
+                break;
+            case "activityStocks":
+                return 6;
+                break;
+            default:
+                return 5;
+                break;
+    }
+}
+
+function setImage(activityNumber){
+    var orgx = activities[activityNumber].x;
+    var orgy = activities[activityNumber].y;
+    activities[activityNumber] = activityAnimations[getActivityNumber(zonesAttached[activityNumber])];
+    activities[activityNumber].x = activityPositions[activityNumber];
+    activities[activityNumber].y = 145;
+    activities[activityNumber].visible = true;
+}
+
+function doAction(){
+    var dayAction = gameTurn%5;
+    // console.log(times[dayAction].key);
+    switch(dayAction) {
+        case 0:
+            moveDayMarker(gameDayPositions.firstX+50);
+            clearVisibilityActivities();
+            setImage(0);
+            activities[0].visible = true;
+          break;
+
+        case 1:
+            moveDayMarker(gameDayPositions.secondX+50);
+            clearVisibilityActivities();
+            setImage(1);
+            activities[1].visible = true;
+        break;
+
+        case 2:
+            moveDayMarker(gameDayPositions.thirdX+50);
+            clearVisibilityActivities();
+            setImage(2);
+            activities[2].visible = true;
+          break;
+
+        case 3:
+            moveDayMarker(gameDayPositions.fourthX+50);
+            clearVisibilityActivities();
+            setImage(3);
+            activities[3].visible = true;
+        break;
+
+        case 4:
+            moveDayMarker(gameDayPositions.fifthX+50);
+            clearVisibilityActivities();
+            setImage(4);
+            activities[4].visible = true;
+        break;
+      }
+}
+
+function updateDay(){
+    turn.text = Math.floor(gameTurn/5);
+}
+
+function moveDayMarker(newPos){
+        gameDayMarker.x = newPos;
+
+};
+
+function checkAction(){
+    switch(gameState) {
+        case "pause":
+          break;
+
+        case "play":
+            if((Date.now()-gameCounter)>=gameTime.play){
+                gameCounter = Date.now();
+                gameTurn++;
+            }
+          break;
+
+        case "fast":
+            if((Date.now()-gameCounter)>=gameTime.fast){
+                gameCounter = Date.now();
+                gameTurn++;
+            }
+        break;
+      }
+};
 
 
 // Updating the mask on top of the bar
 function updateBar(number, objM, objP){
-    console.log(objM.x);
     if(number >= 0 && number <= 100){
         let updatedWidth = objP.width / 100 * number;
         objM.x = leftSide(objP)-objP.width/2 + updatedWidth;
@@ -301,3 +496,11 @@ function leftSide(obj){
 function topSide(obj){
     return (obj.y - obj.height/2);
 }
+
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+  };
