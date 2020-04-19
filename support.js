@@ -23,7 +23,7 @@ var gameDayMarker;
 
 var gameTime = {
     play: 800,
-    fast: 20
+    fast: 200
 }
 
 var game;
