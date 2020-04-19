@@ -9,8 +9,9 @@ window.onload = function() {
                 width: 800,
                 height: 450
             },
-            scene: [playGame, endGame]
+            scene: [playGame, endGame],
         }
+        
         game = new Phaser.Game(gameConfig);
         window.focus();
     }
@@ -33,11 +34,36 @@ var endGame = new Phaser.Class({
     
         create: function ()
         {
-
-            this.add.text(200, 80, "You survived: ", { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
+            this.add.text(20, 80, "You survived a successful life: ", { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
             this.add.text(200, 160, getDay(), { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
-            this.add.text(200, 240, " days", { fontFamily: 'Arial', fontSize: 60, color: '#000000' });
-            this.add.text(200, 320, " F5 to try to perform better in life", { fontFamily: 'Arial', fontSize: 20, color: '#000000' });
+            this.add.text(320, 160, " days", { fontFamily: 'Arial', fontSize: 60, color: '#ff0000' });
+            this.add.text(200, 350, " F5 to try to perform better in life", { fontFamily: 'Arial', fontSize: 20, color: '#ff0000' });
+            var failReason = "You failed due to ";
+            var reasonCount = 0;
+            if(progressValue<=0){
+                failReason = failReason + "your ability to make progress in your life!"
+                reasonCount++;
+            }
+            if(healthValue<=0){
+                failReason = failReason + "your ability to prioritize the health of your grandma!"
+                reasonCount++;
+            }
+            if(wealthValue<=0){
+                failReason = failReason + "your ability to make money work without being in shit depth!"
+                reasonCount++;
+            }
+            if(plantsValue<=0){
+                failReason = failReason + "your ability to make progress in your life!"
+                reasonCount++;
+            }
+            if(awesomeValue<=0){
+                failReason = failReason + "your ability to make progress in your life!"
+                reasonCount++;
+            }
+            if(reasonCount > 1){
+                failReason = "You failed due to multiple reasons... Sigh, don't get me started."
+            }
+            this.add.text(50, 320, failReason, { fontFamily: 'Arial', fontSize: 20, color: '#000000' });
         }
     
     });
@@ -106,11 +132,17 @@ class playGame extends Phaser.Scene{
 
         // Introduction
         this.load.image("introduction", "assets/introduction.png");
+
+        // Audio 
+        this.load.audio('theme', "assets/theme.m4a");
     }
 
     create ()
     {
-       
+        var music = this.sound.add('theme');
+        music.loop = true;
+        music.play();
+        console.log(music);
         //#region Layout and Topbar
         // Layout of the display
         this.graphics = this.add.graphics();
